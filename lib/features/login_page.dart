@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
-import 'package:flutter_beautiful_care_web/data/patient_repository.dart';
-import 'package:flutter_beautiful_care_web/features/patient_manage_page.dart';
+import 'package:flutter_beautiful_care_web/data/category_repository.dart';
+import 'package:flutter_beautiful_care_web/features/main_page.dart';
 import 'package:flutter_beautiful_care_web/widget/show_dialog_loading.dart';
 
 import 'package:provider/provider.dart';
@@ -27,11 +27,11 @@ class _LoginPageState extends State<LoginPage> {
 
   String password;
 
-  PatientRepository patientRepository;
+  CategoryRepository categoryRepository;
 
 
   Future<bool> login() async {
-    return patientRepository.login(username, password);
+    return categoryRepository.login(username, password);
   }
 
   void loadLogin() async {
@@ -41,7 +41,7 @@ class _LoginPageState extends State<LoginPage> {
           value.setString(USERNAME, username);
           value.setString(PASSWORD, password);
         });
-        Navigator.of(context).pushNamed(PatientManagePage.ROUTE_NAME);
+        Navigator.of(context).pushNamed(MainPage.ROUTE_NAME);
       } else {
         scaffold.currentState.showSnackBar(SnackBar(
           content: Container(
@@ -58,11 +58,11 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    patientRepository = Provider.of<PatientRepository>(context, listen: false);
+    categoryRepository = Provider.of<CategoryRepository>(context, listen: false);
     SharedPreferences.getInstance().then((value){
       if (value.getString(USERNAME).isNotEmpty
           && value.getString(PASSWORD).isNotEmpty) {
-        Navigator.of(context).pushReplacementNamed(PatientManagePage.ROUTE_NAME);
+        Navigator.of(context).pushReplacementNamed(MainPage.ROUTE_NAME);
       }
     });
   }
@@ -74,7 +74,7 @@ class _LoginPageState extends State<LoginPage> {
       body: Form(
         key: globalKey,
         child: Container(
-          color: Colors.pinkAccent.withOpacity(0.5),
+          color: Colors.blue[600],
           alignment: Alignment.center,
           child: Card(
             elevation: 1,
@@ -129,6 +129,7 @@ class _LoginPageState extends State<LoginPage> {
                     color: Colors.transparent,
                   ),
                   RaisedButton(
+                    color: Colors.blue[600],
                     shape: StadiumBorder(),
                     onPressed: (){
                       if (globalKey.currentState.validate()) {
@@ -136,7 +137,7 @@ class _LoginPageState extends State<LoginPage> {
                         loadLogin();
                       }
                     },
-                    child: Text('Đăng nhập'),
+                    child: Text('Đăng nhập',style: TextStyle(color: Colors.white),),
                   )
                 ],
               ),

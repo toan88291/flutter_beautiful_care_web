@@ -1,18 +1,41 @@
 import 'package:flutter_beautiful_care_web/data/models/category.dart';
+import 'package:flutter_beautiful_care_web/data/models/post.dart';
 import 'firebase_data_source.dart';
+import 'models/sub_category.dart';
 
-class PatientRepository {
+class CategoryRepository {
   static const TAG = 'PatientRepository';
 
   List<Category> categoryData = [];
 
+  List<SubCategory> categorySubData = [];
+
+  List<Post> postData = [];
+
+  Post postDataId;
+
   FireBaseDataSource fireBaseDataSource;
 
-  PatientRepository(this.fireBaseDataSource);
+  CategoryRepository(this.fireBaseDataSource);
 
   Future<List<Category>> getList() async{
     categoryData = await fireBaseDataSource.getList();
     return categoryData;
+  }
+
+  Future<List<SubCategory>> getListSubCategory(String id) async{
+    categorySubData = await fireBaseDataSource.getListSubCategory(id);
+    return categorySubData;
+  }
+
+  Future<List<Post>> getPost(String id) async{
+    postData = await fireBaseDataSource.getPost(id);
+    return postData;
+  }
+
+  Future<Post> getPostId(String id) async{
+    postDataId = await fireBaseDataSource.getPostId(id);
+    return postDataId;
   }
 
 //  Future<List<Patient>> getListPatient(){
@@ -31,9 +54,9 @@ class PatientRepository {
 //    return fireBaseDataSource.insert(data);
 //  }
 //
-//  Future<bool> insertPatient(String code, Patient data){
-//    return fireBaseDataSource.insertPatient(code, data);
-//  }
+  Future<bool> insertSubCateGory(String code, Map<String, dynamic> data){
+    return fireBaseDataSource.insertSubCateGory(code, data);
+  }
 //
 //  Future<bool> checkCode (String code){
 //    return fireBaseDataSource.checkCode(code);
@@ -55,9 +78,17 @@ class PatientRepository {
 //    return fireBaseDataSource.checkPatient(patient);
 //  }
 //
-//  Future<bool> update(String docId, Map<String, dynamic> data) {
-//    return fireBaseDataSource.update(docId, data);
-//  }
+  Future<bool> update(String docId, Map<String, dynamic> data) {
+    return fireBaseDataSource.update(docId, data);
+  }
+
+  Future<bool> updatePost(String docId, Map<String, dynamic> data) {
+    return fireBaseDataSource.updatePost(docId, data);
+  }
+
+  Future<bool> updateSubCateGory(String id, String docId, Map<String, dynamic> data) {
+    return fireBaseDataSource.updateSubCateGory(id,docId, data);
+  }
 //
 //  Future<bool> updatePatient(String docId, Map<String, dynamic> data) {
 //    return fireBaseDataSource.updatePatient(docId, data);

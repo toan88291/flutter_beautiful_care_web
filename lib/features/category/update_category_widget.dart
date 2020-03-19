@@ -1,18 +1,24 @@
 import 'dart:async';
-import 'dart:html';
+import 'dart:html' as html;
 import 'dart:typed_data';
+import 'package:firebase/firestore.dart' as fs;
 import 'package:firebase/firebase.dart' as fb;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_beautiful_care_web/data/category_repository.dart';
 import 'package:flutter_beautiful_care_web/data/models/category.dart';
 import 'package:image_picker_web/image_picker_web.dart';
+import 'package:provider/provider.dart';
+
 
 
 class UpdateCategoryWidget extends StatefulWidget {
 
   final Category data;
 
-  UpdateCategoryWidget(this.data);
+  final VoidCallback onLoad;
+
+  UpdateCategoryWidget(this.data, this.onLoad);
 
   @override
   _UpdateCategoryWidgetState createState() => _UpdateCategoryWidgetState();
@@ -33,136 +39,75 @@ class _UpdateCategoryWidgetState extends State<UpdateCategoryWidget> {
 
   String imageLink;
 
-  File _image;
-
   StorageReference storageReference;
 
-  File uploadedImage;
+  CategoryRepository categoryRepository;
+
+  final fs.Firestore firestore = fb.firestore();
+
+  Uint8List bytesFromPicker;
+  html.File uploadedImage;
 
   StorageUploadTask uploadTask;
 
   FirebaseStorage storage;
 
    fb.StorageReference ref;
-   InputElement _uploadImage;
 
-//  Future uploadToFireBase(File imageFile) async {
-//
-//
-//    storage = FirebaseStorage(storageBucket:'gs://beautiful-care.appspot.com');
-//
-//    String path = "icon/${DateTime.now()}.png";
-//
-//    uploadTask = storage.ref().child(path).putFile(imageFile);
-//
-//
-//    print('upload');
-//
-//    final StreamSubscription<StorageTaskEvent> streamSubscription = uploadTask.events.listen((event) {
-//      print('EVENT ${event.type}');
-//    });
-//
-//    await uploadTask.onComplete;
-//    streamSubscription.cancel();
-
-//  }
+  Image pickedImage;
 
   fb.UploadTask _uploadTask;
 
-  uploadToFirebase(File imageFile) async {
-    final filePath = 'images/${DateTime.now()}.png';
+  bool loadDing = false;
+
+  uploadToFireBase(Uint8List imageFile) async {
+    final filePath = '${DateTime.now()}.png';
     _uploadTask = fb
         .storage()
         .ref('icon')
         .child(filePath)
         .put(imageFile);
     _uploadTask.onStateChanged.listen((data) {
-      debugPrint('$TAG $data');
+      data.ref.getDownloadURL().then((value){
+        debugPrint('link image: ${value.toString()}');
+        Map<String,dynamic> map;
+        map = {
+          'icon' : value.toString(),
+          'name' : widget.data.name,
+        };
+        try {
+          debugPrint('id ${widget.data.docId}');
+          categoryRepository.update(widget.data.docId, map).then((value) {
+            if(value) {
+              setState(() {
+                loadDing = false;
+                widget.onLoad();
+                Navigator.of(context).pop(true);
+              });
+            }
+          });
+        } catch (err) {
+          debugPrint('error: $err');
+        }
+      });
     });
   }
 
   Future uploadImage() async {
-//    Uint8List fromPicker = await ImagePickerWeb.getImage(asUint8List: true);
-//    if (fromPicker != null) {
-//      setState(() {
-//        _image = File.fromRawPath(fromPicker);
-//      });
-//    }
-//    uploadToFireBase(_image);
-//    try {
-//      ImageUploadApp();
-//    } on fb.FirebaseJsNotLoadedException catch (e) {
-//      print(e);
-//    }
 
+    bytesFromPicker =
+    await ImagePickerWeb.getImage(asUint8List: true);
+    setState(() {
 
-    InputElement uploadInput = FileUploadInputElement();
-    uploadInput.click();
+    });
 
-    uploadInput.onChange.listen(
-          (changeEvent) {
-        File file = uploadInput.files.first;
-        final reader = FileReader();
-
-        reader.readAsDataUrl(file);
-
-        reader.onLoadEnd.listen(
-          // After file finiesh reading and loading, it will be uploaded to firebase storage
-              (loadEndEvent) async {
-            uploadToFirebase(file);
-          },
-        );
-        /*
-        reader.onLoadEnd.listen(
-              (loadEndEvent) async {
-              try {
-                debugPrint('image name : ${file.name.toString()}');
-                ref = fb.storage().ref('icon');
-                debugPrint('DEBUG---- $ref');
-                _uploadImage = querySelector('#upload_image');
-                _uploadImage.disabled = false;
-
-                _uploadImage.onChange.listen((e) async {
-                  e.preventDefault();
-
-                  var customMetadata = {'location': 'Prague', 'owner': 'You'};
-                  var uploadTask = ref.child(file.name).put(
-                      file,
-                      fb.UploadMetadata(
-                          contentType: file.type, customMetadata: customMetadata));
-
-                  uploadTask.onStateChanged.listen((e) {
-                    querySelector('#message').text =
-                    'Transfered ${e.bytesTransferred}/${e.totalBytes}...';
-                  });
-
-                  try {
-                    var snapshot = await uploadTask.future;
-                    var filePath = await snapshot.ref.getDownloadURL();
-                    var image = ImageElement(src: filePath.toString());
-                    document.body.append(image);
-                    var metadata = snapshot.metadata.customMetadata;
-                    querySelector('#message').text = 'Metadata: ${metadata.toString()}';
-                  } catch (e) {
-                    print(e);
-                  }
-                });
-
-              } catch(error) {
-                debugPrint('$TAG $error');
-              }
-            },
-        );
-        */
-      },
-    );
   }
 
 
   @override
   void initState() {
     super.initState();
-
+    categoryRepository = Provider.of(context, listen: false);
   }
 
   @override
@@ -188,6 +133,7 @@ class _UpdateCategoryWidgetState extends State<UpdateCategoryWidget> {
                   child: Column(
                     children: <Widget>[
                       TextFormField(
+                        readOnly: true,
                         decoration: InputDecoration(
                             hintText: 'Tên danh mục',
                             labelText: 'Tên danh mục',
@@ -210,10 +156,11 @@ class _UpdateCategoryWidgetState extends State<UpdateCategoryWidget> {
                         color: Colors.transparent,
                       ),
                       Container(
-                        child: imageLink == null
-                            ? Image.network(widget.data.icon, width: 120, height: 120,)
-                            : Image.network(imageLink, width: 120, height: 120,)
+                        child: bytesFromPicker == null
+                            ? Image.network(widget.data.icon, width: 120, height: 120,fit: BoxFit.fill,)
+                            : Image.memory(bytesFromPicker, height: 120,width: 120,fit: BoxFit.fill),
                       ),
+                      SizedBox(height: 8,),
                       InkWell(
                         onTap: (){
                           uploadImage();
@@ -228,8 +175,7 @@ class _UpdateCategoryWidgetState extends State<UpdateCategoryWidget> {
                             'Chọn Ảnh',
                           ),
                         ),
-                      )
-
+                      ),
                     ],
                   ),
                 ),
@@ -241,17 +187,26 @@ class _UpdateCategoryWidgetState extends State<UpdateCategoryWidget> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
                   FlatButton(
+                    color: Colors.blue,
                     onPressed: (){
                       if ( globalKey.currentState.validate()) {
                         globalKey.currentState.save();
-
+                        setState(() {
+                          loadDing = true;
+                        });
+                        uploadToFireBase(bytesFromPicker);
                       }
-                    }, child: Text('LƯU'),
+                    },
+                    child: loadDing ? CircularProgressIndicator(backgroundColor: Colors.white,)
+                      : Text('LƯU',style: TextStyle(color: Colors.white),),
                   ),
+                  SizedBox(width: 8,),
                   FlatButton(
+                    color: Colors.red,
                     onPressed: (){
                       Navigator.of(context).pop();
-                    }, child: Text('HUỶ'),
+                    },
+                    child: Text('HUỶ',style: TextStyle(color: Colors.white),),
                   )
                 ],
               ),
@@ -263,40 +218,3 @@ class _UpdateCategoryWidgetState extends State<UpdateCategoryWidget> {
     );
   }
 }
-
-//class ImageUploadApp {
-//  final fb.StorageReference ref;
-//  final InputElement _uploadImage;
-//
-//  ImageUploadApp()
-//      : ref = fb.storage().ref('icon'),
-//        _uploadImage = querySelector('#upload_image') {
-//    _uploadImage.disabled = false;
-//
-//    _uploadImage.onChange.listen((e) async {
-//      e.preventDefault();
-//      var file = (e.target as FileUploadInputElement).files[0];
-//
-//      var customMetadata = {'location': 'Prague', 'owner': 'You'};
-//      var uploadTask = ref.child(file.name).put(
-//          file,
-//          fb.UploadMetadata(
-//              contentType: file.type, customMetadata: customMetadata));
-//      uploadTask.onStateChanged.listen((e) {
-//        querySelector('#message').text =
-//        'Transfered ${e.bytesTransferred}/${e.totalBytes}...';
-//      });
-//
-//      try {
-//        var snapshot = await uploadTask.future;
-//        var filePath = await snapshot.ref.getDownloadURL();
-//        var image = ImageElement(src: filePath.toString());
-//        document.body.append(image);
-//        var metadata = snapshot.metadata.customMetadata;
-//        querySelector('#message').text = 'Metadata: ${metadata.toString()}';
-//      } catch (e) {
-//        print(e);
-//      }
-//    });
-//  }
-//}

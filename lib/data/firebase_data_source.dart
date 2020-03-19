@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_beautiful_care_web/data/models/category.dart';
+import 'package:flutter_beautiful_care_web/data/models/post.dart';
+import 'package:flutter_beautiful_care_web/data/models/sub_category.dart';
 
 class FireBaseDataSource {
   static const TAG = 'FirebaseDataSource';
@@ -8,10 +10,44 @@ class FireBaseDataSource {
   FireBaseDataSource(this._firestore);
 
   Future<List<Category>> getList() async {
-    QuerySnapshot querySnapshot = await _firestore.collection('/category').orderBy("name", descending: true).getDocuments();
+    QuerySnapshot querySnapshot = await _firestore.collection('category').orderBy("name", descending: true).getDocuments();
     List<Category> results = querySnapshot.documents.map((data) => Category.fromJson(data.data)..docId = data.documentID).toList();
     return results;
   }
+
+  Future<List<SubCategory>> getListSubCategory(String id) async {
+    QuerySnapshot querySnapshot = await _firestore.collection('category').document(id).collection('sub_category').getDocuments();
+    List<SubCategory> results = querySnapshot.documents.map((data) => SubCategory.fromJson(data.data)..docId = data.documentID).toList();
+    return results;
+  }
+
+  Future<List<Post>> getPost(String id) async {
+    QuerySnapshot querySnapshot = await _firestore.collection('post')
+        .where("sub_category_id", isEqualTo: id)
+        .getDocuments();
+    List<Post> results = querySnapshot.documents.map((data) => Post.fromJson(data.data)..docId = data.documentID).toList();
+    return results;
+  }
+
+  Future<Post> getPostId(String id) async {
+    Post results;
+    Map<String, dynamic> map;
+    DocumentReference documentReference = _firestore.collection('post')
+        .document(id);
+    DocumentSnapshot documentSnapshot = await documentReference.get();
+    map = documentSnapshot.data;
+    results = Post.fromJson(map)..docId = documentSnapshot.documentID;
+    return results;
+  }
+
+  Future<bool> updatePost(String docId, Map<String, dynamic> data) async {
+    DocumentReference documentReference = Firestore.instance
+        .collection('post').document(docId);
+    await documentReference.updateData(data);
+    return documentReference.updateData(data) != null;
+  }
+
+
 
 //  Future<List<Patient>> getListPatient() async {
 //    QuerySnapshot querySnapshot = await _firestore.collection('/patient').getDocuments();
@@ -48,10 +84,12 @@ class FireBaseDataSource {
 //    return data;
 //  }
 //
-//  Future<bool> insertPatient(String code, Patient data) async {
-//    await _firestore.collection('/patient').document(code).setData(data.toJson());
-//    return _firestore.collection('/patient').document(code).setData(data.toJson()) != null;
-//  }
+  Future<bool> insertSubCateGory(String code, Map<String, dynamic> data) async {
+    DocumentReference documentReference = Firestore.instance
+        .collection('category').document(code).collection('sub_category').document();
+    await documentReference.setData(data);
+    return documentReference.setData(data) != null;
+  }
 //
 //  Future<bool> checkCode(String code) async{
 //    DocumentReference docReference = _firestore.collection('/medical_examination').document(code);
@@ -87,12 +125,19 @@ class FireBaseDataSource {
 //        .document(docId).delete() != null;
 //  }
 //
-//  Future<bool> update(String docId, Map<String, dynamic> data) async {
-//    DocumentReference documentReference = Firestore.instance
-//        .collection('medical_examination').document(docId);
-//    await documentReference.updateData(data);
-//    return documentReference.updateData(data) != null;
-//  }
+  Future<bool> update(String docId, Map<String, dynamic> data) async {
+    DocumentReference documentReference = Firestore.instance
+        .collection('category').document(docId);
+    await documentReference.updateData(data);
+    return documentReference.updateData(data) != null;
+  }
+
+  Future<bool> updateSubCateGory(String id, String docId, Map<String, dynamic> data) async {
+    DocumentReference documentReference = Firestore.instance
+        .collection('category').document(id).collection('sub_category').document(docId);
+    await documentReference.setData(data);
+    return documentReference.setData(data) != null;
+  }
 //
 //  Future<bool> updatePatient(String docId, Map<String, dynamic> data) async {
 //    DocumentReference documentReference = Firestore.instance

@@ -5,22 +5,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class DrawerWidget extends StatefulWidget {
 
-  final VoidCallback onClick;
+  final ValueChanged<int> onClick;
 
   final PageController pageController;
 
-  final VoidCallback onChange;
+  final int index;
 
-  final bool changePage;
-
-  DrawerWidget(this.onClick, this.pageController, this.onChange, this.changePage);
+  DrawerWidget(this.onClick, this.pageController, this.index);
 
   @override
   _DrawerWidgetState createState() => _DrawerWidgetState();
 }
 
 class _DrawerWidgetState extends State<DrawerWidget> {
-
 
   String username;
 
@@ -39,31 +36,36 @@ class _DrawerWidgetState extends State<DrawerWidget> {
     return Drawer(
       child: Column(
         children: <Widget>[
-          Row(
-            children: <Widget>[
-              Container(
-                alignment: Alignment.centerLeft,
-                child: IconButton(
-                  onPressed: widget.onClick,
-                  icon: Icon(Icons.arrow_back, color: Colors.blue,),
+          Container(
+            color: Colors.blue,
+            child: Row(
+              children: <Widget>[
+                Container(
+                  alignment: Alignment.centerLeft,
+                  child: IconButton(
+                    onPressed: (){
+                      widget.onClick(-1);
+                    },
+                    icon: Icon(Icons.arrow_back, color: Colors.white,),
+                  ),
                 ),
-              ),
-              SizedBox(width: 12,),
-              Text(
-                username ?? '',
-              )
-            ],
+                SizedBox(width: 12,),
+                Text(
+                  'Trang Chủ ($username)' ?? '',
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                )
+              ],
+            ),
           ),
           InkWell(
             onTap: (){
-              if(widget.changePage != false) {
-                widget.onChange();
-                widget.onClick();
-                widget.pageController.jumpToPage(0);
-              }
+              widget.onClick(0);
+              widget.pageController.jumpToPage(0);
             },
             child: Container(
-              color: widget.changePage == false ? Colors.grey.withOpacity(0.3) : Colors.white,
+              color: widget.index == 0 ? Colors.grey.withOpacity(0.3) : Colors.white,
               child: ListTile(
                 title: Text('Quản lý bài viết',style: Theme.of(context).textTheme.subtitle.copyWith(
                     color: Colors.black87
@@ -73,14 +75,11 @@ class _DrawerWidgetState extends State<DrawerWidget> {
           ),
           InkWell(
             onTap: (){
-              if (widget.changePage == false) {
-                widget.onChange();
-                widget.onClick();
-                widget.pageController.jumpToPage(1);
-              }
+              widget.onClick(1);
+              widget.pageController.jumpToPage(1);
             },
             child: Container(
-              color: widget.changePage ? Colors.grey.withOpacity(0.3) : Colors.white,
+              color: widget.index == 1 ? Colors.grey.withOpacity(0.3) : Colors.white,
               child: ListTile(
                 title: Text('Quản lý danh mục',style: Theme.of(context).textTheme.subtitle.copyWith(
                     color: Colors.black87

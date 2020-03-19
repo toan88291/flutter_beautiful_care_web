@@ -2,12 +2,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_beautiful_care_web/data/category_repository.dart';
 import 'package:provider/provider.dart';
 
 import 'data/firebase_data_source.dart';
-import 'data/patient_repository.dart';
 import 'features/login_page.dart';
-import 'features/patient_manage_page.dart';
+import 'features/main_page.dart';
 
 
 void main() => runApp(MyApp());
@@ -18,8 +18,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider<PatientRepository>(
-          create: (context) => PatientRepository(
+        Provider<CategoryRepository>(
+          create: (context) => CategoryRepository(
             FireBaseDataSource(
               Firestore.instance
             )
@@ -40,8 +40,8 @@ class MyApp extends StatelessWidget {
         ),
         onGenerateRoute: (setting) {
           switch(setting.name) {
-            case PatientManagePage.ROUTE_NAME:
-              return CupertinoPageRoute(builder: (context) => PatientManagePage());
+            case MainPage.ROUTE_NAME:
+              return CupertinoPageRoute(builder: (context) => MainPage());
             default:
               return MaterialPageRoute(builder: (context) => LoginPage() );
           }

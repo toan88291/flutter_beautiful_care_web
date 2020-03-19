@@ -1,25 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_beautiful_care_web/data/category_repository.dart';
-import 'package:flutter_beautiful_care_web/data/models/category.dart';
+import 'package:flutter_beautiful_care_web/data/models/sub_category.dart';
 import 'package:provider/provider.dart';
-import 'package:tuple/tuple.dart';
 
 import 'header_category_widget.dart';
-import 'row_category_widget.dart';
+import 'input_sub_category_widget.dart';
+import 'row_sub_category_widget.dart';
 
-class CategoryPage extends StatefulWidget {
+class SubCategoryWidget extends StatefulWidget {
+  final String id;
 
-  final ValueChanged<Tuple2<String,String>> onchangePage;
-
-  CategoryPage(this.onchangePage);
+  SubCategoryWidget(this.id);
 
   @override
-  _CategoryPageState createState() => _CategoryPageState();
+  _SubCategoryWidgetState createState() => _SubCategoryWidgetState();
 }
 
-class _CategoryPageState extends State<CategoryPage> {
+class _SubCategoryWidgetState extends State<SubCategoryWidget> {
 
-  List<Category> data;
+  List<SubCategory> data;
 
   VoidCallback onLoad;
 
@@ -31,7 +30,7 @@ class _CategoryPageState extends State<CategoryPage> {
     categoryRepository = Provider.of(context,listen: false);
     onLoad = (){
       data = null;
-      categoryRepository.getList().then((value){
+      categoryRepository.getListSubCategory(widget.id).then((value){
         setState(() {
           data = value;
         });
@@ -42,7 +41,7 @@ class _CategoryPageState extends State<CategoryPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    categoryRepository.getList().then((value){
+    categoryRepository.getListSubCategory(widget.id).then((value){
       setState(() {
         data = value;
       });
@@ -62,18 +61,43 @@ class _CategoryPageState extends State<CategoryPage> {
                   shrinkWrap: true,
                   scrollDirection: Axis.vertical,
                   physics: BouncingScrollPhysics(),
-                  itemBuilder: (context, index) => RowCategoryWidget(data[index], index, onLoad, widget.onchangePage),
+                  itemBuilder: (context, index) => RowSubCategoryWidget(data[index], widget.id, index, onLoad),
                   itemCount: data?.length ?? 0,
                   separatorBuilder: (context, index) => Container( color: Colors.transparent, child: const Divider( ), ),
-
                 )
             )
           ],
         ),
+        Positioned(
+          bottom: 0,
+          right: -12,
+          child: FloatingActionButton(
+            onPressed: () {
+                _showInput().then((value) => {});
+            },
+            child: Icon(Icons.add, color: Colors.white,),
+          ),
+        )
       ],
     ) : Container(
       alignment: Alignment.center,
       child: CircularProgressIndicator(),
     );
   }
+
+  Future<void> _showInput() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(16)),
+          ),
+          child: InputSubCategoryWidget(widget.id,onLoad)
+        );
+      },
+    );
+  }
+
 }
