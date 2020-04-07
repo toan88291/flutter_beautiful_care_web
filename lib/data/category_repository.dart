@@ -66,9 +66,9 @@ class CategoryRepository {
     return fireBaseDataSource.login(user, pass);
   }
 //
-//  Future<bool> deleteMedical(String docId) {
-//    return fireBaseDataSource.deleteMedical(docId);
-//  }
+  Future<bool> deleteSubCategory(String docId,String docIdSub) {
+    return fireBaseDataSource.deleteSubCategory(docId,docIdSub);
+  }
 //
 //  Future<bool> deletePatient(String docId) {
 //    return fireBaseDataSource.deletePatient(docId);
@@ -78,7 +78,7 @@ class CategoryRepository {
 //    return fireBaseDataSource.checkPatient(patient);
 //  }
 //
-  Future<bool> update(String docId, Map<String, dynamic> data) {
+  Future<bool> update(String docId, Category data) {
     return fireBaseDataSource.update(docId, data);
   }
 

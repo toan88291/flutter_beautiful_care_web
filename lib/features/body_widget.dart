@@ -110,9 +110,17 @@ class _BodyWidgetState extends State<BodyWidget> {
                           children: <Widget>[
                             Container(
                               width: 160,
+                              padding: EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.blue, width: 2),
+                                borderRadius: BorderRadius.all(Radius.circular(8)),
+                              ),
                               child: DropdownButton<String>(
                                 hint: Text("Danh Mục"),
                                 items: getCateGory(),
+                                underline: Container(
+                                  color: Colors.white,
+                                ),
                                 onChanged: (value) {
                                   setState(() {
                                     _value = value;
@@ -128,20 +136,22 @@ class _BodyWidgetState extends State<BodyWidget> {
                             FlatButton(
                               color: Colors.blue,
                               onPressed: () {
-                                setState(() {
-                                  loadDing = true;
-                                });
-                                categoryRepository
-                                    .getListSubCategory(_value)
-                                    .then((data) {
-                                  if (data.isNotEmpty) {
-                                    setState(() {
-                                      showCategory = true;
-                                      loadDing = false;
-                                      dataSubCategory = data;
-                                    });
-                                  }
-                                });
+                                if(_value != null) {
+                                  setState(() {
+                                    loadDing = true;
+                                  });
+                                  categoryRepository
+                                      .getListSubCategory(_value)
+                                      .then((data) {
+                                    if (data.isNotEmpty) {
+                                      setState(() {
+                                        showCategory = true;
+                                        loadDing = false;
+                                        dataSubCategory = data;
+                                      });
+                                    }
+                                  });
+                                }
                               },
                               padding: EdgeInsets.symmetric(
                                   horizontal: 12, vertical: 8),
@@ -162,47 +172,55 @@ class _BodyWidgetState extends State<BodyWidget> {
                       Visibility(
                         visible: showCategory,
                         child: Expanded(
-                          child: ListView.builder(
-                            itemCount: dataSubCategory?.length,
-                            itemBuilder: (context, index) {
-                              return ListTile(
-                                onTap: () {
-                                  setState(() {
-                                    showCategory = false;
-                                    categoryRepository
-                                        .getPost(dataSubCategory[index].docId)
-                                        .then((value) {
-                                      if (value.isNotEmpty) {
-                                        setState(() {
-                                          dataPost = value;
-                                        });
-                                      } else {
-                                        setState(() {
-                                          dataPost = [];
-                                        });
-                                      }
+                          child: Container(
+                            margin: EdgeInsets.only(bottom: 8),
+                            padding: EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.blue, width: 2),
+                              borderRadius: BorderRadius.all(Radius.circular(8)),
+                            ),
+                            child: ListView.builder(
+                              itemCount: dataSubCategory?.length,
+                              itemBuilder: (context, index) {
+                                return ListTile(
+                                  onTap: () {
+                                    setState(() {
+                                      showCategory = false;
+                                      categoryRepository
+                                          .getPost(dataSubCategory[index].docId)
+                                          .then((value) {
+                                        if (value.isNotEmpty) {
+                                          setState(() {
+                                            dataPost = value;
+                                          });
+                                        } else {
+                                          setState(() {
+                                            dataPost = [];
+                                          });
+                                        }
+                                      });
                                     });
-                                  });
-                                },
-                                leading: Container(
-                                  height: 48,
-                                  width: 48,
-                                  decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      image: DecorationImage(
-                                          image: NetworkImage(
-                                        dataSubCategory[index]?.image,
-                                      ))),
-                                ),
-                                title: Container(
-                                  padding: EdgeInsets.only(left: 20),
-                                  child: Text(
-                                    dataSubCategory[index].name,
+                                  },
+                                  leading: Container(
+                                    height: 48,
+                                    width: 48,
+                                    decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        image: DecorationImage(
+                                            image: NetworkImage(
+                                              dataSubCategory[index]?.image,
+                                            ))),
                                   ),
-                                ),
-                              );
-                            },
-                          ),
+                                  title: Container(
+                                    padding: EdgeInsets.only(left: 20),
+                                    child: Text(
+                                      dataSubCategory[index].name,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          )
                         ),
                       ),
                       Expanded(

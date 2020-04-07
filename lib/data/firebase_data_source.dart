@@ -113,10 +113,10 @@ class FireBaseDataSource {
 //    return documentSnapshot.exists;
 //  }
 //
-//  Future<bool> deleteMedical(String docId) async {
-//    return Firestore.instance.collection('medical_examination')
-//        .document(docId).delete() != null;
-//  }
+  Future<bool> deleteSubCategory(String docId, String docIdSub) async {
+    return Firestore.instance.collection('category')
+        .document(docId).collection('sub_category').document(docIdSub).delete() != null;
+  }
 //
 //  Future<bool> deletePatient(String docId) async {
 //    await Firestore.instance.collection('patient')
@@ -125,11 +125,11 @@ class FireBaseDataSource {
 //        .document(docId).delete() != null;
 //  }
 //
-  Future<bool> update(String docId, Map<String, dynamic> data) async {
+  Future<bool> update(String docId, Category data) async {
     DocumentReference documentReference = Firestore.instance
         .collection('category').document(docId);
-    await documentReference.updateData(data);
-    return documentReference.updateData(data) != null;
+    await documentReference.updateData(data.toJson());
+    return documentReference.updateData(data.toJson()) != null;
   }
 
   Future<bool> updateSubCateGory(String id, String docId, Map<String, dynamic> data) async {

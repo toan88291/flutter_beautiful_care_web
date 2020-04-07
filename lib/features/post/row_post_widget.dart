@@ -26,6 +26,11 @@ class _RowPostWidgetState extends State<RowPostWidget> {
               widget.onchangePage(Tuple2('3',widget.data.docId));
             },
             child: Container(
+              margin: EdgeInsets.only(top: 4),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.all(Radius.circular(8)),
+              ),
               padding: EdgeInsets.all(16),
               child: Row(
                 children: <Widget>[
@@ -47,7 +52,7 @@ class _RowPostWidgetState extends State<RowPostWidget> {
                         borderRadius: BorderRadius.all(Radius.circular(8)),
                         image: DecorationImage(
                           image: NetworkImage(
-                            widget.data.image,
+                            widget?.data?.thumb ?? "",
                           )
                         )
                       ),
@@ -67,7 +72,6 @@ class _RowPostWidgetState extends State<RowPostWidget> {
                               padding: EdgeInsets.symmetric(
                                   horizontal: 12, vertical: 8),
                               onPressed: () {
-//                                _showUpdate().then((bool) {});
                               },
                               child: Text(
                                 'Xoá',
@@ -82,7 +86,6 @@ class _RowPostWidgetState extends State<RowPostWidget> {
                               padding: EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 8),
                               onPressed: () {
-//                    _showUpdate().then((bool) {});
                               },
                               child: Text(
                                 'Sửa',

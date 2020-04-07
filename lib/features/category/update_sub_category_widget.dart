@@ -1,10 +1,12 @@
 import 'dart:html' as html;
+import 'dart:math';
 import 'dart:typed_data';
 import 'package:firebase/firestore.dart' as fs;
 import 'package:firebase/firebase.dart' as fb;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_beautiful_care_web/data/category_repository.dart';
+import 'package:flutter_beautiful_care_web/data/models/category.dart';
 import 'package:flutter_beautiful_care_web/data/models/sub_category.dart';
 import 'package:image_picker_web/image_picker_web.dart';
 import 'package:provider/provider.dart';
@@ -59,33 +61,49 @@ class _UpdateSubCategoryWidgetState extends State<UpdateSubCategoryWidget> {
   bool loadDing = false;
 
   uploadToFireBase(Uint8List imageFile) async {
-    final filePath = '${DateTime.now()}.png';
-    _uploadTask = fb.storage().ref('icon').child(filePath).put(imageFile);
-    _uploadTask.onStateChanged.listen((data) {
-      data.ref.getDownloadURL().then((value) {
-        debugPrint('link image: ${value.toString()}');
-        Map<String, dynamic> map;
-        map = {
-          'image': value.toString(),
-          'name': widget.data.name,
-        };
-        try {
-          categoryRepository
-              .updateSubCateGory(widget.id, widget.data.docId, map)
-              .then((value) {
-            if (value) {
-              setState(() {
-                loadDing = false;
-                widget.onLoad();
-                Navigator.of(context).pop(true);
-              });
-            }
+    Random random = new Random();
+    int randomNumber = random.nextInt(100000000) +10 ;
+    if(bytesFromPicker != null) {
+      final filePath = randomNumber.toString();
+      debugPrint(filePath);
+      _uploadTask = fb.storage().ref('icon').child(filePath).put(imageFile);
+      _uploadTask.onStateChanged.listen((data) {
+        data.ref.getDownloadURL().then((value) {
+          try {
+            categoryRepository.update(widget.data.docId, Category(
+              value.toString(),
+              nameCateGory,
+            )).then((value2) {
+              if(value2) {
+                setState(() {
+                  loadDing = false;
+                  widget.onLoad();
+                  Navigator.of(context).pop(true);
+                });
+              }
+            });
+          }catch (err) {
+            debugPrint('error: $err');
+          }
+          fb.storage().ref('icon').child(
+              widget.data.image.replaceAll('https://firebasestorage.googleapis.com/v0/b/beautiful-care.appspot.com/o/icon%2F', '').split('?')[0]
+          ).delete();
+        });
+      });
+    } else {
+      categoryRepository.update(widget.data.docId, Category(
+        widget.data.image,
+        nameCateGory,
+      )).then((value2) {
+        if(value2) {
+          setState(() {
+            loadDing = false;
+            widget.onLoad();
+            Navigator.of(context).pop(true);
           });
-        } catch (err) {
-          debugPrint('error: $err');
         }
       });
-    });
+    }
   }
 
   Future uploadImage() async {

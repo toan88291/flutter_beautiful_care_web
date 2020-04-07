@@ -28,13 +28,21 @@ class _RowCategoryWidgetState extends State<RowCategoryWidget> {
         widget.onchangePage(Tuple2("2",widget.data.docId));
       },
       child: Container(
+        color: widget.index % 2 == 0 ? Colors.grey[100] : Colors.blue[100],
         padding: EdgeInsets.all(16),
         child: Row(
           children: <Widget>[
             _itemRow((widget.index + 1).toString()),
             _itemRow(widget.data.name),
             Expanded(
-              child: Image.network(widget.data.icon, width: 52, height: 52,),
+              child: Container(
+                decoration: ShapeDecoration(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                    )
+                ),
+                child: Image.network(widget.data.icon,height: 60,width: 60,),
+              ),
             ),
             Expanded(child: Container(
                 alignment: Alignment.center,
@@ -43,7 +51,11 @@ class _RowCategoryWidgetState extends State<RowCategoryWidget> {
                   color: Colors.grey,
                   padding: EdgeInsets.symmetric(horizontal: 12,vertical: 8),
                   onPressed: (){
-                    _showUpdate().then((bool) {});
+                    _showUpdate().then((bool) {
+                      setState(() {
+
+                      });
+                    });
                   },
                   child: Text(
                     'Sửa',

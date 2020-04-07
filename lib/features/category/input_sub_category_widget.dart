@@ -193,7 +193,7 @@ class _InputSubCategoryWidgetState extends State<InputSubCategoryWidget> {
                           if (globalKey.currentState.validate() && bytesFromPicker != null) {
                             globalKey.currentState.save();
                             setState(() {
-                              checkError = true;
+                              checkError = false;
                               loadDing = true;
                             });
                             uploadToFireBase(bytesFromPicker);
