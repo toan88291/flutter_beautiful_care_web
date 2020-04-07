@@ -3,6 +3,7 @@ import 'package:flutter_beautiful_care_web/data/category_repository.dart';
 import 'package:flutter_beautiful_care_web/data/models/sub_category.dart';
 import 'package:flutter_beautiful_care_web/widget/show_dialog_loading.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase/firebase.dart' as fb;
 
 import 'update_sub_category_widget.dart';
 
@@ -23,12 +24,14 @@ class RowSubCategoryWidget extends StatefulWidget {
 }
 
 class _RowSubCategoryWidgetState extends State<RowSubCategoryWidget> {
+  fb.UploadTask _uploadTask;
 
   CategoryRepository _categoryRepository;
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _categoryRepository = Provider.of(context, listen: false);
+
   }
   @override
   Widget build(BuildContext context) {
@@ -41,12 +44,12 @@ class _RowSubCategoryWidgetState extends State<RowSubCategoryWidget> {
           _itemRow(widget.data.name),
           Expanded(
             child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(60)),
-                image: DecorationImage(
-                  image: NetworkImage(widget.data.image)
-                )
+              decoration: ShapeDecoration(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                  )
               ),
+              child: Image.network(widget.data.image,height: 60,width: 60,),
             ),
           ),
           Expanded(child: Row(
@@ -125,11 +128,14 @@ class _RowSubCategoryWidgetState extends State<RowSubCategoryWidget> {
           actions: <Widget>[
             RaisedButton(
               onPressed: (){
+                fb.storage().ref('icon').child(
+                    widget.data.image.replaceAll('https://firebasestorage.googleapis.com/v0/b/beautiful-care.appspot.com/o/icon%2F', '').split('?')[0]
+                ).delete();
                 showDialogProgressLoading(context, _categoryRepository
                     .deleteSubCategory(widget.id, widget.data.docId)).then((value){
                   if(value) {
-                    Navigator.of(context).pop();
                     widget.onLoad();
+                    Navigator.of(context).pop();
                   }
                 });
               },

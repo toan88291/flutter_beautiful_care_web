@@ -1,4 +1,5 @@
 import 'dart:html' as html;
+import 'dart:math';
 import 'dart:typed_data';
 import 'package:firebase/firestore.dart' as fs;
 import 'package:firebase/firebase.dart' as fb;
@@ -52,24 +53,18 @@ class _InputSubCategoryWidgetState extends State<InputSubCategoryWidget> {
   fb.UploadTask _uploadTask;
 
   uploadToFireBase(Uint8List imageFile) async {
-    final filePath = '${DateTime.now()}.png';
+    Random random = new Random();
+    int randomNumber = random.nextInt(100000000) +10 ;
+    final filePath = randomNumber.toString()+'.png';
     _uploadTask = fb.storage().ref('icon').child(filePath).put(imageFile);
     _uploadTask.onStateChanged.listen((data) {
-      data.ref.getDownloadURL().then((value) {
-        debugPrint('link image: ${value.toString()}');
-        Map<String,dynamic> map;
-        map = {
-          'image' : value.toString(),
-          'name' : nameCateGory,
-        };
-        SubCategory subCategory = SubCategory(
-          value.toString(),
-          nameCateGory
-        );
+      data.task.snapshot.ref.getDownloadURL().then((value) {
         try {
           categoryRepository
-              .insertSubCateGory(widget.id, map)
-              .then((value) {
+              .insertSubCateGory(widget.id, SubCategory(
+              value.toString(),
+              nameCateGory
+          ).toJson()).then((value) {
             if (value) {
               setState(() {
                 loadDing = false;

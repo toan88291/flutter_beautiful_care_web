@@ -64,16 +64,15 @@ class _UpdateSubCategoryWidgetState extends State<UpdateSubCategoryWidget> {
     Random random = new Random();
     int randomNumber = random.nextInt(100000000) +10 ;
     if(bytesFromPicker != null) {
-      final filePath = randomNumber.toString();
-      debugPrint(filePath);
+      final filePath = randomNumber.toString()+'.png';
       _uploadTask = fb.storage().ref('icon').child(filePath).put(imageFile);
       _uploadTask.onStateChanged.listen((data) {
-        data.ref.getDownloadURL().then((value) {
+        data.task.snapshot.ref.getDownloadURL().then((value) {
           try {
-            categoryRepository.update(widget.data.docId, Category(
+            categoryRepository.updateSubCateGory(widget.id,widget.data.docId, SubCategory(
               value.toString(),
               nameCateGory,
-            )).then((value2) {
+            ).toJson()).then((value2) {
               if(value2) {
                 setState(() {
                   loadDing = false;
@@ -91,10 +90,10 @@ class _UpdateSubCategoryWidgetState extends State<UpdateSubCategoryWidget> {
         });
       });
     } else {
-      categoryRepository.update(widget.data.docId, Category(
+      categoryRepository.updateSubCateGory(widget.id,widget.data.docId, SubCategory(
         widget.data.image,
         nameCateGory,
-      )).then((value2) {
+      ).toJson()).then((value2) {
         if(value2) {
           setState(() {
             loadDing = false;
@@ -143,7 +142,6 @@ class _UpdateSubCategoryWidgetState extends State<UpdateSubCategoryWidget> {
                       child: Column(
                         children: <Widget>[
                           TextFormField(
-                            readOnly: true,
                             decoration: InputDecoration(
                                 hintText: 'Tên danh mục',
                                 labelText: 'Tên danh mục',

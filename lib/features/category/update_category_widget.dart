@@ -1,13 +1,12 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:html' as html;
 import 'dart:math';
 import 'dart:typed_data';
+import 'package:firebase/firebase.dart';
 import 'package:firebase/firestore.dart' as fs;
 import 'package:firebase/firebase.dart' as fb;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_beautiful_care_web/data/category_repository.dart';
 import 'package:flutter_beautiful_care_web/data/models/category.dart';
 import 'package:image_picker_web/image_picker_web.dart';
@@ -42,8 +41,6 @@ class _UpdateCategoryWidgetState extends State<UpdateCategoryWidget> {
 
   String imageLink;
 
-  StorageReference storageReference;
-
   CategoryRepository categoryRepository;
 
   final fs.Firestore firestore = fb.firestore();
@@ -64,7 +61,7 @@ class _UpdateCategoryWidgetState extends State<UpdateCategoryWidget> {
 
   bool loadDing = false;
 
-  uploadToFireBase(Uint8List imageFile) {
+  uploadToFireBase(Uint8List imageFile) async {
     Random random = new Random();
     int randomNumber = random.nextInt(100000000) +10 ; //
     if(bytesFromPicker != null) {
@@ -76,31 +73,35 @@ class _UpdateCategoryWidgetState extends State<UpdateCategoryWidget> {
           .child(filePath+'.png')
           .put(imageFile);
       _uploadTask.onStateChanged.listen((data){
-        data.ref.getDownloadURL().then((value){
-          debugPrint('link : $value');
-          debugPrint('name : $nameCateGory');
-//            try {
-//              categoryRepository.update(widget.data.docId, Category(
-//                value.toString(),
-//                nameCateGory,
-//              )).then((value2) {
-//                if(value2) {
-//                  setState(() {
-//                    loadDing = false;
-//                    widget.onLoad();
-//                    Navigator.of(context).pop(true);
-//                  });
-//                }
-//              });
-//            }catch (err) {
-//              debugPrint('error: $err');
-//            }
-//            fb.storage().ref('icon').child(
-//                widget.data.icon.replaceAll('https://firebasestorage.googleapis.com/v0/b/beautiful-care.appspot.com/o/icon%2F', '').split('?')[0]
-//            ).delete();
-        }).catchError((error){
-          debugPrint('error get link file: $error');
-        });
+        debugPrint('1');
+//        if(data.task.snapshot.state == TaskState.SUCCESS) {
+//          debugPrint('2');
+          data.task.snapshot.ref.getDownloadURL().then((value){
+            debugPrint('link : $value');
+            debugPrint('name : $nameCateGory');
+            try {
+              categoryRepository.update(widget.data.docId, Category(
+                value.toString(),
+                nameCateGory,
+              )).then((value2) {
+                if(value2) {
+                  setState(() {
+                    loadDing = false;
+                    widget.onLoad();
+                    Navigator.of(context).pop(true);
+                  });
+                }
+              });
+            }catch (err) {
+              debugPrint('error: $err');
+            }
+            fb.storage().ref('icon').child(
+                widget.data.icon.replaceAll('https://firebasestorage.googleapis.com/v0/b/beautiful-care.appspot.com/o/icon%2F', '').split('?')[0]
+            ).delete();
+          }).catchError((error){
+            debugPrint('error get link file: $error');
+          });
+//        }
       }).onError((err){
         debugPrint('error: $err');
       });
@@ -182,7 +183,7 @@ class _UpdateCategoryWidgetState extends State<UpdateCategoryWidget> {
                       ),
                       Container(
                         child: bytesFromPicker == null
-                            ? Image.network(widget.data.icon, width: 120, height: 120,fit: BoxFit.fill,)
+                            ? Image.network(widget?.data?.icon, width: 120, height: 120,fit: BoxFit.fill,)
                             : Image.memory(bytesFromPicker, height: 120,width: 120,fit: BoxFit.fill,cacheWidth: 120,cacheHeight: 120,),
                       ),
                       SizedBox(height: 8,),

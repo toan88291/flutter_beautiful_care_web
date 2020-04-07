@@ -31,9 +31,11 @@ class _SubCategoryWidgetState extends State<SubCategoryWidget> {
     onLoad = (){
       data = null;
       categoryRepository.getListSubCategory(widget.id).then((value){
-        setState(() {
-          data = value;
-        });
+        if(value != null) {
+          setState(() {
+            data = value;
+          });
+        }
       });
     };
   }
@@ -42,9 +44,11 @@ class _SubCategoryWidgetState extends State<SubCategoryWidget> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     categoryRepository.getListSubCategory(widget.id).then((value){
-      setState(() {
-        data = value;
-      });
+      if(value != null) {
+        setState(() {
+          data = value;
+        });
+      }
     });
   }
 

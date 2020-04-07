@@ -1,7 +1,10 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_beautiful_care_web/data/category_repository.dart';
 import 'package:flutter_beautiful_care_web/data/models/post.dart';
 import 'package:flutter_beautiful_care_web/data/models/sub_category.dart';
+import 'package:image_picker_web/image_picker_web.dart';
 import 'package:provider/provider.dart';
 import 'package:rich_code_editor/rich_code_editor.dart';
 import 'package:tuple/tuple.dart';
@@ -20,6 +23,8 @@ class _DetailPostWidgetState extends State<DetailPostWidget> {
   List<SubCategory> dataSubCategory;
 
   Post data;
+
+  Uint8List bytesFromPicker;
 
   VoidCallback onLoad;
 
@@ -113,6 +118,14 @@ class _DetailPostWidgetState extends State<DetailPostWidget> {
     return item;
   }
 
+  Future uploadImage() async {
+
+    bytesFromPicker = await ImagePickerWeb.getImage(asUint8List: true);
+    setState(() {
+
+    });
+
+  }
 
   @override
   void initState() {
@@ -260,14 +273,16 @@ class _DetailPostWidgetState extends State<DetailPostWidget> {
                           border: Border.all(color: Colors.blue, width: 2),
                           borderRadius: BorderRadius.all(Radius.circular(8)),
                           image:  DecorationImage(
-                              image: NetworkImage(
+                              image: bytesFromPicker == null ? NetworkImage(
                                 data?.thumb != null ? data.thumb : " ",
-                              ),
+                              ) : MemoryImage(bytesFromPicker),
                               fit: BoxFit.fill
                           )
                       ),
                       child: FlatButton(
-                        onPressed: (){},
+                        onPressed: (){
+                          uploadImage();
+                        },
                         color: Colors.white.withOpacity(0.7),
                         padding: EdgeInsets.all(12),
                         child: Text(
