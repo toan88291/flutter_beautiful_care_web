@@ -109,7 +109,7 @@ class _BodyWidgetState extends State<BodyWidget> {
                           mainAxisSize: MainAxisSize.max,
                           children: <Widget>[
                             Container(
-                              width: 160,
+                              width: 200,
                               padding: EdgeInsets.all(4),
                               decoration: BoxDecoration(
                                 border: Border.all(color: Colors.blue, width: 2),
@@ -133,37 +133,43 @@ class _BodyWidgetState extends State<BodyWidget> {
                             SizedBox(
                               width: 20,
                             ),
-                            FlatButton(
-                              color: Colors.blue,
-                              onPressed: () {
-                                if(_value != null) {
-                                  setState(() {
-                                    loadDing = true;
-                                  });
-                                  categoryRepository
-                                      .getListSubCategory(_value)
-                                      .then((data) {
-                                    if (data.isNotEmpty) {
-                                      setState(() {
-                                        showCategory = true;
-                                        loadDing = false;
-                                        dataSubCategory = data;
-                                      });
-                                    }
-                                  });
-                                }
-                              },
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 8),
-                              child: loadDing
-                                  ? CircularProgressIndicator(
-                                      backgroundColor: Colors.white,
-                                      strokeWidth: 4,
-                                    )
-                                  : Text(
-                                      'Xem',
-                                      style: TextStyle(color: Colors.white),
-                                    ),
+                            Container(
+                              height: 48,
+                              constraints: BoxConstraints(
+                                minHeight: 38
+                              ),
+                              child: RaisedButton(
+                                color: Colors.blue,
+                                onPressed: () {
+                                  if(_value != null) {
+                                    setState(() {
+                                      loadDing = true;
+                                    });
+                                    categoryRepository
+                                        .getListSubCategory(_value)
+                                        .then((data) {
+                                      if (data.isNotEmpty) {
+                                        setState(() {
+                                          showCategory = true;
+                                          loadDing = false;
+                                          dataSubCategory = data;
+                                        });
+                                      }
+                                    });
+                                  }
+                                },
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 8),
+                                child: loadDing
+                                    ? CircularProgressIndicator(
+                                  backgroundColor: Colors.white,
+                                  strokeWidth: 2,
+                                )
+                                    : Text(
+                                  'Xem',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
                             )
                           ],
                         ),

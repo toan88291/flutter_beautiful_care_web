@@ -40,11 +40,11 @@ class FireBaseDataSource {
     return results;
   }
 
-  Future<bool> updatePost(String docId, Map<String, dynamic> data) async {
+  Future<bool> updatePost(String docId, Post data) async {
     DocumentReference documentReference = Firestore.instance
         .collection('post').document(docId);
-    await documentReference.updateData(data);
-    return documentReference.updateData(data) != null;
+    await documentReference.updateData(data.toJson());
+    return documentReference.updateData(data.toJson()) != null;
   }
 
 

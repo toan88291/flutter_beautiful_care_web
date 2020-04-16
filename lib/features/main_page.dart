@@ -43,7 +43,7 @@ class _LargeState extends State<LargePage> {
 
   ValueChanged<int> onClick;
 
-  VoidCallback onLoad;
+  ValueChanged<int> onLoad;
 
   ValueChanged<Tuple2<String,String>> onchangePage;
 
@@ -74,9 +74,12 @@ class _LargeState extends State<LargePage> {
       });
     };
 
-    onLoad = (){
+    onLoad = (index){
       setState(() {
-
+        setState(() {
+          indexMenu = -1;
+          _pageController.jumpToPage(index);
+        });
       });
     };
   }
@@ -176,7 +179,7 @@ class _LargeState extends State<LargePage> {
                 shadows: kElevationToShadow[2]
             ),
             child: Container(
-              child: DetailPostWidget(id),
+              child: DetailPostWidget(id,onLoad),
             ),
           )
         ],

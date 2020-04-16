@@ -82,7 +82,7 @@ class CategoryRepository {
     return fireBaseDataSource.update(docId, data);
   }
 
-  Future<bool> updatePost(String docId, Map<String, dynamic> data) {
+  Future<bool> updatePost(String docId, Post data) {
     return fireBaseDataSource.updatePost(docId, data);
   }
 

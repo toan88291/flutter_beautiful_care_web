@@ -8,17 +8,17 @@ part of 'post.dart';
 
 Post _$PostFromJson(Map<String, dynamic> json) {
   return Post(
+    json['category'] as String,
+    json['sub_category'] as String,
     json['category_id'] as String,
+    json['thumb'] as String,
     (json['content'] as List)?.map((e) => e as String)?.toList(),
     (json['like'] as List)?.map((e) => e as String)?.toList(),
-    json['thumb'] as String,
     (json['save'] as List)?.map((e) => e as String)?.toList(),
     json['sub_category_id'] as String,
     json['title'] as String,
     json['user_id'] as String,
-  )
-    ..category = json['category'] as String
-    ..sub_category = json['sub_category'] as String;
+  );
 }
 
 Map<String, dynamic> _$PostToJson(Post instance) => <String, dynamic>{
