@@ -30,6 +30,8 @@ class _InputSubCategoryWidgetState extends State<InputSubCategoryWidget> {
 
   String nameCateGory;
 
+  String title;
+
   bool loadDing = false;
 
   bool checkError = false;
@@ -58,12 +60,14 @@ class _InputSubCategoryWidgetState extends State<InputSubCategoryWidget> {
     final filePath = randomNumber.toString()+'.png';
     _uploadTask = fb.storage().ref('icon').child(filePath).put(imageFile);
     _uploadTask.onStateChanged.listen((data) {
-      data.task.snapshot.ref.getDownloadURL().then((value) {
+    },onDone: (){
+      _uploadTask.snapshot.ref.getDownloadURL().then((value) {
         try {
           categoryRepository
               .insertSubCateGory(widget.id, SubCategory(
               value.toString(),
-              nameCateGory
+              nameCateGory,
+              title
           ).toJson()).then((value) {
             if (value) {
               setState(() {
@@ -131,6 +135,26 @@ class _InputSubCategoryWidgetState extends State<InputSubCategoryWidget> {
                             },
                             onSaved: (value) {
                               nameCateGory = value;
+                            },
+                          ),
+                          Divider(
+                            height: 32,
+                            color: Colors.transparent,
+                          ),
+                          TextFormField(
+                            decoration: InputDecoration(
+                                hintText: 'Mô tả',
+                                labelText: 'Mô tả',
+                                filled: true),
+                            validator: (value) {
+                              if (value.isEmpty) {
+                                return 'Không được để trống !';
+                              } else {
+                                return null;
+                              }
+                            },
+                            onSaved: (value) {
+                              title = value;
                             },
                           ),
                           Divider(

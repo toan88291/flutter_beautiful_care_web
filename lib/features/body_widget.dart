@@ -5,6 +5,7 @@ import 'package:flutter_beautiful_care_web/data/models/post.dart';
 import 'package:flutter_beautiful_care_web/data/models/sub_category.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
+import 'post/input_post_widget.dart';
 import 'post/row_post_widget.dart';
 import 'dart:developer' as developer;
 
@@ -30,6 +31,8 @@ class _BodyWidgetState extends State<BodyWidget> {
 
   VoidCallback onLoad;
 
+  VoidCallback onLoadPost;
+
   CategoryRepository categoryRepository;
 
   String _value;
@@ -39,6 +42,8 @@ class _BodyWidgetState extends State<BodyWidget> {
   bool showPost = false;
 
   bool loadDing = false;
+
+  int index;
 
   List<DropdownMenuItem<String>> getCateGory() {
     List<DropdownMenuItem<String>> item = [];
@@ -63,10 +68,26 @@ class _BodyWidgetState extends State<BodyWidget> {
     categoryRepository =
         Provider.of<CategoryRepository>(context, listen: false);
     onLoad = () {
-      categoryRepository.getList().then((value) {
+      categoryRepository.getListCategory().then((value) {
         setState(() {
           dataCategory = value;
         });
+      });
+    };
+
+    onLoadPost = (){
+      categoryRepository
+          .getPost(dataSubCategory[index].docId)
+          .then((value) {
+        if (value.isNotEmpty) {
+          setState(() {
+            dataPost = value;
+          });
+        } else {
+          setState(() {
+            dataPost = [];
+          });
+        }
       });
     };
   }
@@ -74,7 +95,7 @@ class _BodyWidgetState extends State<BodyWidget> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    categoryRepository.getList().then((value) {
+    categoryRepository.getListCategory().then((value) {
       setState(() {
         dataCategory = value;
       });
@@ -192,6 +213,7 @@ class _BodyWidgetState extends State<BodyWidget> {
                                   onTap: () {
                                     setState(() {
                                       showCategory = false;
+                                      this.index = index;
                                       categoryRepository
                                           .getPost(dataSubCategory[index].docId)
                                           .then((value) {
@@ -213,6 +235,7 @@ class _BodyWidgetState extends State<BodyWidget> {
                                     decoration: BoxDecoration(
                                         shape: BoxShape.circle,
                                         image: DecorationImage(
+                                          fit: BoxFit.fill,
                                             image: NetworkImage(
                                               dataSubCategory[index]?.image,
                                             ))),
@@ -243,7 +266,7 @@ class _BodyWidgetState extends State<BodyWidget> {
                                 itemBuilder: (context, index) => RowPostWidget(
                                     dataPost[index],
                                     index,
-                                    onLoad,
+                                    onLoadPost,
                                     widget.onchangePage
                                 ),
                                 itemCount: dataPost?.length ?? 0,
@@ -280,13 +303,12 @@ class _BodyWidgetState extends State<BodyWidget> {
   Future<void> _showInput() async {
     return showDialog<void>(
       context: context,
-      barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return Dialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(16)),
           ),
-          child: Container(),
+          child: InputPostWidget(onLoadPost),
         );
       },
     );

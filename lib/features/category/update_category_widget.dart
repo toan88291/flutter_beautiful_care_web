@@ -74,36 +74,33 @@ class _UpdateCategoryWidgetState extends State<UpdateCategoryWidget> {
           .put(imageFile);
       _uploadTask.onStateChanged.listen((data){
         debugPrint('1');
-//        if(data.task.snapshot.state == TaskState.SUCCESS) {
-//          debugPrint('2');
-          data.task.snapshot.ref.getDownloadURL().then((value){
-            debugPrint('link : $value');
-            debugPrint('name : $nameCateGory');
-            try {
-              categoryRepository.update(widget.data.docId, Category(
-                value.toString(),
-                nameCateGory,
-              )).then((value2) {
-                if(value2) {
-                  setState(() {
-                    loadDing = false;
-                    widget.onLoad();
-                    Navigator.of(context).pop(true);
-                  });
-                }
-              });
-            }catch (err) {
-              debugPrint('error: $err');
-            }
-            fb.storage().ref('icon').child(
-                widget.data.icon.replaceAll('https://firebasestorage.googleapis.com/v0/b/beautiful-care.appspot.com/o/icon%2F', '').split('?')[0]
-            ).delete();
-          }).catchError((error){
-            debugPrint('error get link file: $error');
-          });
-//        }
-      }).onError((err){
-        debugPrint('error: $err');
+
+      },onDone: (){
+        _uploadTask.snapshot.ref.getDownloadURL().then((value){
+          debugPrint('link : $value');
+          debugPrint('name : $nameCateGory');
+          try {
+            categoryRepository.update(widget.data.docId, Category(
+              value.toString(),
+              nameCateGory,
+            )).then((value2) {
+              if(value2) {
+                setState(() {
+                  loadDing = false;
+                  widget.onLoad();
+                  Navigator.of(context).pop(true);
+                });
+              }
+            });
+          }catch (err) {
+            debugPrint('error: $err');
+          }
+          fb.storage().ref('icon').child(
+              widget.data.icon.replaceAll('https://firebasestorage.googleapis.com/v0/b/beautiful-care.appspot.com/o/icon%2F', '').split('?')[0]
+          ).delete();
+        }).catchError((error){
+          debugPrint('error get link file: $error');
+        });
       });
     } else {
       categoryRepository.update(widget.data.docId, Category(

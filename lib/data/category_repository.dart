@@ -1,5 +1,6 @@
 import 'package:flutter_beautiful_care_web/data/models/category.dart';
 import 'package:flutter_beautiful_care_web/data/models/post.dart';
+import 'package:flutter_beautiful_care_web/data/models/user.dart';
 import 'firebase_data_source.dart';
 import 'models/sub_category.dart';
 
@@ -12,14 +13,16 @@ class CategoryRepository {
 
   List<Post> postData = [];
 
+  List<User> userData = [];
+
   Post postDataId;
 
   FireBaseDataSource fireBaseDataSource;
 
   CategoryRepository(this.fireBaseDataSource);
 
-  Future<List<Category>> getList() async{
-    categoryData = await fireBaseDataSource.getList();
+  Future<List<Category>> getListCategory() async{
+    categoryData = await fireBaseDataSource.getListCategory();
     return categoryData;
   }
 
@@ -31,6 +34,11 @@ class CategoryRepository {
   Future<List<Post>> getPost(String id) async{
     postData = await fireBaseDataSource.getPost(id);
     return postData;
+  }
+
+  Future<List<User>> getUser() async{
+    userData = await fireBaseDataSource.getUser();
+    return userData;
   }
 
   Future<Post> getPostId(String id) async{
@@ -57,6 +65,11 @@ class CategoryRepository {
   Future<bool> insertSubCateGory(String code, Map<String, dynamic> data){
     return fireBaseDataSource.insertSubCateGory(code, data);
   }
+
+  Future<bool> insertPost(Post data){
+    return fireBaseDataSource.insertPost(data);
+  }
+
 //
 //  Future<bool> checkCode (String code){
 //    return fireBaseDataSource.checkCode(code);
@@ -93,4 +106,13 @@ class CategoryRepository {
 //  Future<bool> updatePatient(String docId, Map<String, dynamic> data) {
 //    return fireBaseDataSource.updatePatient(docId, data);
 //  }
+
+  Future<bool> deletePost(String id) async {
+    return fireBaseDataSource.deletePost(id);
+  }
+
+  Future<bool> deleteUser(String id) async {
+    return fireBaseDataSource.deleteUser(id);
+  }
+
 }

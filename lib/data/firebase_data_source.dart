@@ -3,13 +3,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_beautiful_care_web/data/models/category.dart';
 import 'package:flutter_beautiful_care_web/data/models/post.dart';
 import 'package:flutter_beautiful_care_web/data/models/sub_category.dart';
+import 'package:flutter_beautiful_care_web/data/models/user.dart';
 
 class FireBaseDataSource {
   static const TAG = 'FirebaseDataSource';
   Firestore _firestore;
   FireBaseDataSource(this._firestore);
 
-  Future<List<Category>> getList() async {
+  Future<List<Category>> getListCategory() async {
     QuerySnapshot querySnapshot = await _firestore.collection('category').orderBy("name", descending: true).getDocuments();
     List<Category> results = querySnapshot.documents.map((data) => Category.fromJson(data.data)..docId = data.documentID).toList();
     return results;
@@ -29,6 +30,12 @@ class FireBaseDataSource {
     return results;
   }
 
+  Future<List<User>> getUser() async {
+    QuerySnapshot querySnapshot = await _firestore.collection('user').where('role', isEqualTo: false).getDocuments();
+    List<User> results = querySnapshot.documents.map((data) => User.fromJson(data.data)..docId = data.documentID).toList();
+    return results;
+  }
+
   Future<Post> getPostId(String id) async {
     Post results;
     Map<String, dynamic> map;
@@ -43,7 +50,6 @@ class FireBaseDataSource {
   Future<bool> updatePost(String docId, Post data) async {
     DocumentReference documentReference = Firestore.instance
         .collection('post').document(docId);
-    await documentReference.updateData(data.toJson());
     return documentReference.updateData(data.toJson()) != null;
   }
 
@@ -87,9 +93,17 @@ class FireBaseDataSource {
   Future<bool> insertSubCateGory(String code, Map<String, dynamic> data) async {
     DocumentReference documentReference = Firestore.instance
         .collection('category').document(code).collection('sub_category').document();
-    await documentReference.setData(data);
     return documentReference.setData(data) != null;
   }
+
+  Future<bool> insertPost(Post data) async {
+    debugPrint('7');
+    DocumentReference documentReference = Firestore.instance
+        .collection('post').document();
+    debugPrint('8');
+    return documentReference.setData(data.toJson()) != null;
+  }
+
 //
 //  Future<bool> checkCode(String code) async{
 //    DocumentReference docReference = _firestore.collection('/medical_examination').document(code);
@@ -128,14 +142,12 @@ class FireBaseDataSource {
   Future<bool> update(String docId, Category data) async {
     DocumentReference documentReference = Firestore.instance
         .collection('category').document(docId);
-    await documentReference.updateData(data.toJson());
     return documentReference.updateData(data.toJson()) != null;
   }
 
   Future<bool> updateSubCateGory(String id, String docId, Map<String, dynamic> data) async {
     DocumentReference documentReference = Firestore.instance
         .collection('category').document(id).collection('sub_category').document(docId);
-    await documentReference.setData(data);
     return documentReference.setData(data) != null;
   }
 //
@@ -145,4 +157,14 @@ class FireBaseDataSource {
 //    await documentReference.updateData(data);
 //    return documentReference.updateData(data) != null;
 //  }
+
+  Future<bool> deletePost(String id) async {
+    return Firestore.instance.collection('post')
+        .document(id).delete() != null;
+  }
+
+  Future<bool> deleteUser(String id) async {
+    return Firestore.instance.collection('user')
+        .document(id).delete() != null;
+  }
 }

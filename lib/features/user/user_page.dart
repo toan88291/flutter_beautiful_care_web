@@ -1,25 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_beautiful_care_web/data/category_repository.dart';
-import 'package:flutter_beautiful_care_web/data/models/category.dart';
+import 'package:flutter_beautiful_care_web/data/models/user.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
-import 'header_category_widget.dart';
-import 'row_category_widget.dart';
+import 'header_user_widget.dart';
+import 'row_user_widget.dart';
 
-class CategoryPage extends StatefulWidget {
-
+class UserPage extends StatefulWidget {
   final ValueChanged<Tuple2<String,String>> onchangePage;
 
-  CategoryPage(this.onchangePage);
+  UserPage(this.onchangePage);
 
   @override
-  _CategoryPageState createState() => _CategoryPageState();
+  _UserPageState createState() => _UserPageState();
 }
 
-class _CategoryPageState extends State<CategoryPage> {
-
-  List<Category> data;
+class _UserPageState extends State<UserPage> {
+  List<User> data;
 
   VoidCallback onLoad;
 
@@ -31,7 +29,7 @@ class _CategoryPageState extends State<CategoryPage> {
     categoryRepository = Provider.of(context,listen: false);
     onLoad = (){
       data = null;
-      categoryRepository.getListCategory().then((value){
+      categoryRepository.getUser().then((value){
         setState(() {
           data = value;
         });
@@ -42,7 +40,7 @@ class _CategoryPageState extends State<CategoryPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    categoryRepository.getListCategory().then((value){
+    categoryRepository.getUser().then((value){
       setState(() {
         data = value;
       });
@@ -56,13 +54,14 @@ class _CategoryPageState extends State<CategoryPage> {
       children: <Widget>[
         Column(
           children: <Widget>[
-            HeaderCategoryWidget(),
+            SizedBox(height: 12),
+            HeaderUserWidget(),
             Expanded(
                 child: ListView.separated(
                   shrinkWrap: true,
                   scrollDirection: Axis.vertical,
                   physics: BouncingScrollPhysics(),
-                  itemBuilder: (context, index) => RowCategoryWidget(data[index], index, onLoad, widget.onchangePage),
+                  itemBuilder: (context, index) => RowUserWidget(data[index], index, onLoad, widget.onchangePage),
                   itemCount: data?.length ?? 0,
                   separatorBuilder: (context, index) => Container( color: Colors.transparent, child: const Divider( ), ),
 

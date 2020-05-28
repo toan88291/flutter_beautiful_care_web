@@ -89,6 +89,20 @@ class _DrawerWidgetState extends State<DrawerWidget> {
           ),
           InkWell(
             onTap: (){
+              widget.onClick(4);
+              widget.pageController.jumpToPage(4);
+            },
+            child: Container(
+              color: widget.index == 4 ? Colors.grey.withOpacity(0.3) : Colors.white,
+              child: ListTile(
+                title: Text('Quản lý user',style: Theme.of(context).textTheme.subtitle.copyWith(
+                    color: Colors.black87
+                ),),
+              ),
+            ),
+          ),
+          InkWell(
+            onTap: (){
               SharedPreferences.getInstance().then((value){
                 value.clear();
                 Navigator.pushReplacement(context, MaterialPageRoute(builder: (context){

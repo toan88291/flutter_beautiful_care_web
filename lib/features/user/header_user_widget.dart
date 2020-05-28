@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class HeaderPostWidget extends StatelessWidget {
+class HeaderUserWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -13,26 +13,21 @@ class HeaderPostWidget extends StatelessWidget {
       padding: EdgeInsets.all(16),
       child: Row(
         children: <Widget>[
-          Container(
-            width: 40,
+          Expanded(child: Container(
             alignment: Alignment.center,
             child: Text('STT', style: Theme.of(context).primaryTextTheme.subtitle,),
-          ),
-          Expanded(child: Container(
-            alignment: Alignment.center,
-            child: Text('Tên Bài Viết', style: Theme.of(context).primaryTextTheme.subtitle,),
           ),),
           Expanded(child: Container(
             alignment: Alignment.center,
-            child: Text('Danh Mục', style: Theme.of(context).primaryTextTheme.subtitle),
+            child: Text('Tên User', style: Theme.of(context).primaryTextTheme.subtitle,),
           ),),
           Expanded(child: Container(
             alignment: Alignment.center,
-            child: Text('Image', style: Theme.of(context).primaryTextTheme.subtitle),
+            child: Text('User Name', style: Theme.of(context).primaryTextTheme.subtitle,),
           ),),
           Expanded(child: Container(
             alignment: Alignment.center,
-            child: Text('Like', style: Theme.of(context).primaryTextTheme.subtitle),
+            child: Text('Avatar', style: Theme.of(context).primaryTextTheme.subtitle),
           ),),
           Expanded(child: Container(
             alignment: Alignment.center,

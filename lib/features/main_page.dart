@@ -8,6 +8,7 @@ import 'package:tuple/tuple.dart';
 import 'category/sub_category_widget.dart';
 import 'constant.dart';
 import 'post/detail_post_widget.dart';
+import 'user/user_page.dart';
 
 
 class MainPage extends StatefulWidget {
@@ -70,16 +71,13 @@ class _LargeState extends State<LargePage> {
         indexMenu = -1;
         _pageController.jumpToPage(int.parse(data.item1));
         id = data.item2;
-
       });
     };
 
     onLoad = (index){
       setState(() {
-        setState(() {
-          indexMenu = -1;
-          _pageController.jumpToPage(index);
-        });
+        indexMenu = -1;
+        _pageController.jumpToPage(index);
       });
     };
   }
@@ -181,7 +179,24 @@ class _LargeState extends State<LargePage> {
             child: Container(
               child: DetailPostWidget(id,onLoad),
             ),
-          )
+          ),
+          Container(
+            margin: EdgeInsets.symmetric(
+                vertical: 12,
+                horizontal: 60
+            ),
+            clipBehavior: Clip.hardEdge,
+            decoration: ShapeDecoration(
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(8))
+                ),
+                shadows: kElevationToShadow[2]
+            ),
+            child: Container(
+              child: UserPage(onchangePage),
+            ),
+          ),
         ],
       ),
 //      floatingActionButton: FloatingActionButton(

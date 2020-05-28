@@ -29,7 +29,7 @@ class _SubCategoryWidgetState extends State<SubCategoryWidget> {
     super.initState();
     categoryRepository = Provider.of(context,listen: false);
     onLoad = (){
-      data = null;
+      debugPrint('onLoad');
       categoryRepository.getListSubCategory(widget.id).then((value){
         if(value != null) {
           setState(() {

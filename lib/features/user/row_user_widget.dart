@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_beautiful_care_web/data/models/category.dart';
+import 'package:flutter_beautiful_care_web/data/category_repository.dart';
+import 'package:flutter_beautiful_care_web/data/models/user.dart';
+import 'package:flutter_beautiful_care_web/widget/show_dialog_loading.dart';
+import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
-import 'update_category_widget.dart';
-
-class RowCategoryWidget extends StatefulWidget {
-
-  final Category data;
+class RowUserWidget extends StatefulWidget {
+  final User data;
 
   final int index;
 
@@ -14,18 +14,18 @@ class RowCategoryWidget extends StatefulWidget {
 
   final ValueChanged<Tuple2<String,String>> onchangePage;
 
-  RowCategoryWidget(this.data, this.index, this.onLoad, this.onchangePage);
+  RowUserWidget(this.data, this.index, this.onLoad, this.onchangePage);
 
   @override
-  _RowCategoryWidgetState createState() => _RowCategoryWidgetState();
+  _RowUserWidgetState createState() => _RowUserWidgetState();
 }
 
-class _RowCategoryWidgetState extends State<RowCategoryWidget> {
+class _RowUserWidgetState extends State<RowUserWidget> {
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: (){
-        widget.onchangePage(Tuple2("2",widget.data.docId));
+//        widget.onchangePage(Tuple2("2",widget.data.docId));
       },
       child: Container(
         color: widget.index % 2 == 0 ? Colors.grey[100] : Colors.lightBlueAccent[100],
@@ -33,7 +33,8 @@ class _RowCategoryWidgetState extends State<RowCategoryWidget> {
         child: Row(
           children: <Widget>[
             _itemRow((widget.index + 1).toString()),
-            _itemRow(widget.data.name),
+            _itemRow(widget.data.fullname),
+            _itemRow(widget.data.username),
             Expanded(
               child: Container(
                 decoration: ShapeDecoration(
@@ -41,7 +42,7 @@ class _RowCategoryWidgetState extends State<RowCategoryWidget> {
                       borderRadius: BorderRadius.all(Radius.circular(20)),
                     )
                 ),
-                child: Image.network(widget.data.icon,height: 60,width: 60,),
+                child: Image.network(widget.data.avatar,height: 60,width: 60,),
               ),
             ),
             Expanded(child: Container(
@@ -51,14 +52,14 @@ class _RowCategoryWidgetState extends State<RowCategoryWidget> {
                   color: Colors.grey,
                   padding: EdgeInsets.symmetric(horizontal: 12,vertical: 8),
                   onPressed: (){
-                    _showUpdate().then((bool) {
+                    _showDelete().then((bool) {
                       setState(() {
 
                       });
                     });
                   },
                   child: Text(
-                    'Sửa',
+                    'Xoá',
                     style: TextStyle(color: Colors.yellow),
                   ),
                 )
@@ -77,19 +78,44 @@ class _RowCategoryWidgetState extends State<RowCategoryWidget> {
     ),);
   }
 
-  Future<bool> _showUpdate() async {
+  Future<bool> _showDelete() async {
     return showDialog<bool>(
       context: context,
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(16)),
-          ),
-          child: UpdateCategoryWidget(widget.data,widget.onLoad),
+        return AlertDialog(
+          title: Text('Bạn có muốn xoá không ?'),
+          actions: <Widget>[
+            RaisedButton(
+              onPressed: (){
+                  debugPrint('user id : ${widget.data.docId}');
+                showDialogProgressLoading(context, Provider.of<CategoryRepository>(context, listen: false)
+                    .deleteUser(widget.data.docId)).then((value){
+                  if(value) {
+                    Navigator.of(context).pop();
+                    widget.onLoad();
+                  }
+                });
+              },
+              color: Colors.red,
+              child: Text(
+                  'Có'
+              ),
+            ),
+            RaisedButton(
+              onPressed: (){
+                Navigator.of(context).pop();
+              },
+              color: Colors.blue,
+              child: Text(
+                  'Không'
+              ),
+            )
+          ],
         );
       },
     );
   }
+
 
 }

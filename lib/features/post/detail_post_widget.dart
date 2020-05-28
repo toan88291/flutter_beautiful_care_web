@@ -1,8 +1,11 @@
 import 'dart:math';
 import 'dart:typed_data';
+import 'package:firebase/firebase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_beautiful_care_web/data/category_repository.dart';
+import 'package:flutter_beautiful_care_web/data/models/comment.dart';
 import 'package:flutter_beautiful_care_web/data/models/post.dart';
+import 'package:flutter_beautiful_care_web/data/models/reply_comment.dart';
 import 'package:flutter_beautiful_care_web/data/models/sub_category.dart';
 import 'package:image_picker_web/image_picker_web.dart';
 import 'package:provider/provider.dart';
@@ -29,7 +32,7 @@ class _DetailPostWidgetState extends State<DetailPostWidget> {
 
   Post datas;
 
-  Uint8List bytesFromPicker;
+  Uint8List image_thumb;
 
   VoidCallback onLoad;
 
@@ -42,6 +45,8 @@ class _DetailPostWidgetState extends State<DetailPostWidget> {
   int image = 0;
 
   int video = 0;
+
+  bool loadding = false;
 
   List<String> imageLink  = [];
 
@@ -171,6 +176,7 @@ class _DetailPostWidgetState extends State<DetailPostWidget> {
     item.add(Container(
       width: 60,
       height: 60,
+      margin: EdgeInsets.only(left: 12),
       alignment: Alignment.center,
       child: FlatButton(
         onPressed: (){
@@ -185,7 +191,7 @@ class _DetailPostWidgetState extends State<DetailPostWidget> {
 
   Future uploadImage() async {
 
-    bytesFromPicker = await ImagePickerWeb.getImage(asUint8List: true);
+    image_thumb = await ImagePickerWeb.getImage(asUint8List: true);
     setState(() {
 
     });
@@ -199,44 +205,65 @@ class _DetailPostWidgetState extends State<DetailPostWidget> {
     });
   }
 
-  Future<void> deleteImageStorage() async{
-    if (bytesFromPicker != null && datas.thumb != null) {
-      fb.storage().ref('make-up/tao-khoi').child(
-          datas.thumb.replaceAll('https://firebasestorage.googleapis.com/v0/b/beautiful-care.appspot.com/o/make-up%2Ftao-khoi%2F', '').split('?')[0]
+  Future<void> deleteImageStorage(String path) async{
+    if (image_thumb != null && datas.thumb != null) {
+      fb.storage().ref('make-up').child(
+          datas.thumb.replaceAll('https://firebasestorage.googleapis.com/v0/b/beautiful-care.appspot.com/o/$path%2F', '').split('?')[0]
       ).delete();
     }
     if(imageLinkDelete.length > 0) {
       imageLinkDelete.forEach((element) {
-        fb.storage().ref('make-up/tao-khoi').child(
-            element.replaceAll('https://firebasestorage.googleapis.com/v0/b/beautiful-care.appspot.com/o/make-up%2Ftao-khoi%2F', '').split('?')[0]
+        fb.storage().ref('make-up').child(
+            element.replaceAll('https://firebasestorage.googleapis.com/v0/b/beautiful-care.appspot.com/o/$path%2F', '').split('?')[0]
         ).delete();
       });
     }
   }
 
   Future<void> uploadFile() async {
+    String path;
+    switch (datas.category_id) {
+      case '47RauuVFfeAnxwf8ZPA5' :
+        path = 'make-up';
+        break;
+      case 'WtYq7Bl2EhR0tclLO586' :
+        path = 'mac-dep';
+        break;
+      case 'luOl5F551s0lg9x4qYwz' :
+        path = 'toc-dep';
+        break;
+      case 'ngk0fShOLMKyxOIBieEs' :
+        path = 'dang-dep';
+        break;
+      default:
+        path = 'da-dep';
+        break;
+    }
     int count = 0;
-    await deleteImageStorage();
+    await deleteImageStorage(path);
     Random random = new Random();
     int randomNumber = random.nextInt(100000000) +10 ;
     final filePath = randomNumber.toString()+'.png';
-    if (imageLink.length > 0) {
+
+    if (imageLink.length > 0 ) {
       imageLink.forEach((element) {
         contentData.add('image:$element');
       });
     }
-    if (bytesFromPicker != null && imageFile.length > 0) {
+    if (image_thumb != null && imageFile.length > 0) {
       debugPrint('1');
-      _uploadTask = fb.storage().ref('make-up/tao-khoi').child(filePath).put(bytesFromPicker);
+      _uploadTask = fb.storage().ref(path).child(filePath).put(image_thumb);
       _uploadTask.onStateChanged.listen((data) {
-        data.task.snapshot.ref.getDownloadURL().then((value) {
+      },onDone: (){
+        _uploadTask.snapshot.ref.getDownloadURL().then((value) {
           thumb = value.toString();
           debugPrint('2');
           for(int i=0; i< imageFile.length; i++) {
             debugPrint('3');
-            _uploadTask2 = fb.storage().ref('make-up/tao-khoi').child(i.toString()+filePath).put(imageFile[i]);
+            _uploadTask2 = fb.storage().ref(path).child(i.toString()+filePath).put(imageFile[i]);
             _uploadTask2.onStateChanged.listen((data2) {
-              data2.task.snapshot.ref.getDownloadURL().then((value2) {
+            }, onDone: (){
+              _uploadTask2.snapshot.ref.getDownloadURL().then((value2) {
                 contentData.add('image:$value2');
                 debugPrint('4');
                 setState(() {
@@ -245,27 +272,23 @@ class _DetailPostWidgetState extends State<DetailPostWidget> {
                 if (count == imageFile.length) {
                   getContent();
                   categoryRepository.updatePost(widget.id, Post(
-                      datas.category,
-                      _value.item1,
-                      datas.category_id,
-                      thumb,
-                      contentData,
-                      datas.like,
-                      datas.save,
-                      _value.item2,
-                      title,
-                      datas.user_id
-                  )).then((value2) {
-                    if (value2) {
+                    datas.category,
+                    _value.item1,
+                    datas.category_id,
+                    thumb,
+                    contentData,
+                    datas.like,
+                    _value.item2,
+                    title,
+                    datas.user_id,
+                    DateTime.now()
+                  )).then((value3) {
+                    if (value3) {
                       debugPrint('5');
                       widget.onLoad(0);
                     }
                   });
                 }
-              }).catchError((err){
-                debugPrint('get link error : $err');
-              }).catchError((error){
-                debugPrint(' listen error: $error');
               });
             });
           }
@@ -273,7 +296,7 @@ class _DetailPostWidgetState extends State<DetailPostWidget> {
       });
     } else if (imageFile.length > 0){
       for(int i=0; i< imageFile.length; i++) {
-        _uploadTask = fb.storage().ref('make-up/tao-khoi').child(i.toString()+filePath).put(imageFile[i]);
+        _uploadTask = fb.storage().ref(path).child(i.toString()+filePath).put(imageFile[i]);
         _uploadTask.onStateChanged.listen((data2) {
           data2.task.snapshot.ref.getDownloadURL().then((value2) {
             contentData.add('image:$value2');
@@ -289,10 +312,10 @@ class _DetailPostWidgetState extends State<DetailPostWidget> {
                   datas.thumb,
                   contentData,
                   datas.like,
-                  datas.save,
                   _value.item2,
                   title,
-                  datas.user_id
+                  datas.user_id,
+                  DateTime.now()
               )).then((value2) {
                 if (value2) {
                   widget.onLoad(0);
@@ -302,8 +325,8 @@ class _DetailPostWidgetState extends State<DetailPostWidget> {
           });
         });
       }
-    } else if (bytesFromPicker != null) {
-      _uploadTask = fb.storage().ref('make-up/tao-khoi').child(filePath).put(bytesFromPicker);
+    } else if (image_thumb != null) {
+      _uploadTask = fb.storage().ref('make-up/tao-khoi').child(filePath).put(image_thumb);
       _uploadTask.onStateChanged.listen((data) {
         data.task.snapshot.ref.getDownloadURL().then((value) {
           thumb = value.toString();
@@ -315,10 +338,10 @@ class _DetailPostWidgetState extends State<DetailPostWidget> {
               thumb,
               contentData,
               datas.like,
-              datas.save,
               _value.item2,
               title,
-              datas.user_id
+              datas.user_id,
+              DateTime.now()
           )).then((value2) {
             if (value2) {
               widget.onLoad(0);
@@ -335,10 +358,10 @@ class _DetailPostWidgetState extends State<DetailPostWidget> {
           datas.thumb,
           contentData,
           datas.like,
-          datas.save,
           _value.item2,
           title,
-          datas.user_id
+          datas.user_id,
+          DateTime.now()
       )).then((value2) {
         if (value2) {
           widget.onLoad(0);
@@ -399,7 +422,7 @@ class _DetailPostWidgetState extends State<DetailPostWidget> {
     contentSaveFinal.clear();
     while(contentSave.contains('.\n')) {
       setState(() {
-        contentSaveFinal.add('content:'+ contentSave.substring(0,contentSave.indexOf('.\n')+1));
+        contentSaveFinal.add('content:'+ contentSave.substring(0,contentSave.indexOf('.\n')+1).trim());
         contentSave = contentSave.substring(contentSave.indexOf('.\n')+1, contentSave.length);
       });
 //                          if(contentSave.contains('.\n')) {
@@ -423,7 +446,7 @@ class _DetailPostWidgetState extends State<DetailPostWidget> {
 //                          }
     }
     setState(() {
-      contentSaveFinal.add('content:'+ contentSave);
+      contentSaveFinal.add('content:'+ contentSave.trim());
       contentSaveFinal.add('video:'+ videoLink);
       contentData = contentData + contentSaveFinal;
       debugPrint(
@@ -476,6 +499,13 @@ class _DetailPostWidgetState extends State<DetailPostWidget> {
                             ),
                             onSaved: (value) {
                               title = value;
+                            },
+                            validator: (value) {
+                              if (value.isEmpty) {
+                                return 'Không được để trống';
+                              } else {
+                                return null;
+                              }
                             },
                           ),
                         ))
@@ -539,9 +569,9 @@ class _DetailPostWidgetState extends State<DetailPostWidget> {
                           border: Border.all(color: Colors.blue, width: 2),
                           borderRadius: BorderRadius.all(Radius.circular(8)),
                           image:  DecorationImage(
-                              image: bytesFromPicker == null ? NetworkImage(
+                              image: image_thumb == null ? NetworkImage(
                                 datas?.thumb != null ? datas.thumb : " ",
-                              ) : MemoryImage(bytesFromPicker),
+                              ) : MemoryImage(image_thumb),
                               fit: BoxFit.fill
                           )
                       ),
@@ -578,15 +608,24 @@ class _DetailPostWidgetState extends State<DetailPostWidget> {
                           borderRadius: BorderRadius.all(Radius.circular(8)),
                         ),
                         child: TextFormField(
-                          maxLines: 10,
-                          textInputAction: TextInputAction.newline,
+                          maxLines: null,
+                          textCapitalization: TextCapitalization.words,
                           initialValue: contentText ?? "",
+                          showCursor: true,
                           decoration: InputDecoration(
                               contentPadding: EdgeInsets.only(left: 12),
                               hintText: 'Nội Dung',
                           ),
+
                           onSaved: (value) {
                             contentSave = value;
+                          },
+                          validator: (value) {
+                            if (value.isEmpty) {
+                              return 'Không được để trống';
+                            } else {
+                              return null;
+                            }
                           },
                         ),
                       ),
@@ -611,7 +650,8 @@ class _DetailPostWidgetState extends State<DetailPostWidget> {
                           border: Border.all(color: Colors.blue, width: 2),
                           borderRadius: BorderRadius.all(Radius.circular(8)),
                         ),
-                        child: Row(
+                        child: Wrap(
+                          alignment: WrapAlignment.start,
                           children: getImage(),
                         )
                       ),
@@ -662,14 +702,20 @@ class _DetailPostWidgetState extends State<DetailPostWidget> {
                     onPressed: () {
                       if(_formKey.currentState.validate()) {
                         _formKey.currentState.save();
+                        setState(() {
+                          loadding = true;
+                        });
                         uploadFile();
+                        debugPrint('id: ${datas.category_id}');
                       }
                     },
                     padding: EdgeInsets.symmetric(
                         horizontal: 12, vertical: 8),
-                    child: Text(
+                    child: loadding == false ? Text(
                       'Update',
                       style: TextStyle(color: Colors.white),
+                    ) : Center(
+                      child: CircularProgressIndicator(backgroundColor: Colors.white,)
                     ),
                 )
               ))

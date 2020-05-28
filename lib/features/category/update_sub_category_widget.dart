@@ -30,6 +30,8 @@ class _UpdateSubCategoryWidgetState extends State<UpdateSubCategoryWidget> {
 
   String nameCateGory;
 
+  String title;
+
   String icon;
 
   String name = '';
@@ -67,11 +69,13 @@ class _UpdateSubCategoryWidgetState extends State<UpdateSubCategoryWidget> {
       final filePath = randomNumber.toString()+'.png';
       _uploadTask = fb.storage().ref('icon').child(filePath).put(imageFile);
       _uploadTask.onStateChanged.listen((data) {
-        data.task.snapshot.ref.getDownloadURL().then((value) {
+      }, onDone: (){
+        _uploadTask.snapshot.ref.getDownloadURL().then((value) {
           try {
             categoryRepository.updateSubCateGory(widget.id,widget.data.docId, SubCategory(
               value.toString(),
               nameCateGory,
+              title
             ).toJson()).then((value2) {
               if(value2) {
                 setState(() {
@@ -93,6 +97,7 @@ class _UpdateSubCategoryWidgetState extends State<UpdateSubCategoryWidget> {
       categoryRepository.updateSubCateGory(widget.id,widget.data.docId, SubCategory(
         widget.data.image,
         nameCateGory,
+        title
       ).toJson()).then((value2) {
         if(value2) {
           setState(() {
@@ -156,6 +161,27 @@ class _UpdateSubCategoryWidgetState extends State<UpdateSubCategoryWidget> {
                             },
                             onSaved: (value) {
                               nameCateGory = value;
+                            },
+                          ),
+                          Divider(
+                            height: 32,
+                            color: Colors.transparent,
+                          ),
+                          TextFormField(
+                            decoration: InputDecoration(
+                                hintText: 'Mô tả',
+                                labelText: 'Mô tả',
+                                filled: true),
+                            initialValue: widget.data.title ?? "",
+                            validator: (value) {
+                              if (value.isEmpty) {
+                                return 'Không được để trống !';
+                              } else {
+                                return null;
+                              }
+                            },
+                            onSaved: (value) {
+                              title = value;
                             },
                           ),
                           Divider(

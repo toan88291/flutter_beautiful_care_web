@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_beautiful_care_web/data/category_repository.dart';
 import 'package:flutter_beautiful_care_web/data/models/post.dart';
+import 'package:flutter_beautiful_care_web/widget/show_dialog_loading.dart';
+import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
 class RowPostWidget extends StatefulWidget {
@@ -18,6 +21,16 @@ class RowPostWidget extends StatefulWidget {
 }
 
 class _RowPostWidgetState extends State<RowPostWidget> {
+
+  CategoryRepository _categoryRepository;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _categoryRepository = Provider.of(context, listen: false);
+
+  }
+
   @override
   Widget build(BuildContext context) {
     return widget.data != null
@@ -65,35 +78,18 @@ class _RowPostWidgetState extends State<RowPostWidget> {
                     child: Container(
                         alignment: Alignment.center,
                         padding: EdgeInsets.all(8),
-                        child: Row(
-                          children: <Widget>[
-                            FlatButton(
-                              color: Colors.grey,
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 8),
-                              onPressed: () {
-                              },
-                              child: Text(
-                                'Xoá',
-                                style: TextStyle(color: Colors.yellow),
-                              ),
-                            ),
-                            SizedBox(
-                              width: 4,
-                            ),
-                            FlatButton(
-                              color: Colors.grey,
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 8),
-                              onPressed: () {
-                              },
-                              child: Text(
-                                'Sửa',
-                                style: TextStyle(color: Colors.yellow),
-                              ),
-                            )
-                          ],
-                        )),
+                        child: FlatButton(
+                          color: Colors.grey,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+                          onPressed: () {
+                            _showDelete();
+                          },
+                          child: Text(
+                            'Xoá',
+                            style: TextStyle(color: Colors.yellow),
+                          ),
+                        ),),
                   )
                 ],
               ),
@@ -110,6 +106,44 @@ class _RowPostWidgetState extends State<RowPostWidget> {
         title,
         textAlign: TextAlign.center,
       ),
+    );
+  }
+
+  Future<bool> _showDelete() async {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Bạn có muốn xoá không ?'),
+          actions: <Widget>[
+            RaisedButton(
+              onPressed: (){
+                showDialogProgressLoading(context, _categoryRepository
+                    .deletePost(widget.data.docId)).then((value){
+                  if(value) {
+                    widget.onLoad();
+                    Navigator.of(context).pop();
+                  }
+                });
+              },
+              color: Colors.red,
+              child: Text(
+                  'Có'
+              ),
+            ),
+            RaisedButton(
+              onPressed: (){
+                Navigator.of(context).pop();
+              },
+              color: Colors.blue,
+              child: Text(
+                  'Không'
+              ),
+            )
+          ],
+        );
+      },
     );
   }
 }
